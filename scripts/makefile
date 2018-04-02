@@ -1,2 +1,2 @@
 run:	main.cpp main.h
-	c++ -o run main.cpp
+	c++ -o cppexe main.cpp

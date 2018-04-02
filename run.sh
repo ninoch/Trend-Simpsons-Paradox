@@ -17,7 +17,8 @@ mkdir -p temporary_files
 mkdir -p temporary_files/$csv_file_name
 
 cd scripts
-./run -infile:../input/$csv_file_name".csv" -outfolder:../temporary_files/$csv_file_name -ycol:$target_variable_column -nbins:$num_of_bins -mindatapoints:$least_num_of_datapoints
+make
+./cppexe -infile:../input/$csv_file_name".csv" -outfolder:../temporary_files/$csv_file_name -ycol:$target_variable_column -nbins:$num_of_bins -mindatapoints:$least_num_of_datapoints
 
 #####################################
 #       REGRESSION PARAMETERS       #
