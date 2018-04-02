@@ -26,7 +26,7 @@ Update input_info.json file
 	- ignore_columns: An array of name of the variables for not including them in the algorithm variables. You should list all the columns with string or float values.
 	- log_scales: A dictionary of variable name to boolean value. Which shows you prefer log scale for axis for that variable in output/ plots or not. 
 
-Before running the algorithm, please make sure the json format of the input_info.json file is valid using: https://jsonformatter.curiousconcept.com/
+Before running the algorithm, please make sure the json format of the input_info.json file is [valid](https://jsonformatter.curiousconcept.com/).
 
 ### Step 3: 
 Run the run.sh script 
@@ -36,6 +36,7 @@ Run the run.sh script
 Plots of Trend Simpson's Pairs will be available in output/ directory. For each pair, there is a PDF file. First plot is logistic fit to aggregated data. Second one is logistic for each of the bins. The third plots are histogram and heatplot of the Paradox and Conditioning variables. 
 
 The information about the bins, will be available in temporary_files/ directory. 
+
 	- bins.csv
 	  	- L rows (L = number of features/covariates)
 	  	- Row l is the bin splits for feature L
@@ -49,7 +50,6 @@ The information about the bins, will be available in temporary_files/ directory.
 	- N_tree.csv: Number of datapoints in each bin
 	- R2improvements.csv: Total R^2 improvement for each variable. 
 	- ybar_tree.csv: Average value of Y in each bin. 
-
 
 The details of the algorithm will be printed in the terminal. You can use them as log. Beside that, all the informations about the logistic fits, simpson's pairs and deviance values are availabe in store_results/ directory as python pickle objects. You can use load functions in trend_simpsons.py file for loading them. 
 
