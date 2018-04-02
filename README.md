@@ -7,15 +7,15 @@ More details about the algorithm is available in our paper on ICWSM 2018: "Using
 
 
 # Input and Running: 
-For running the algorithm you need to do the following:
-### Step 1: 
-Add .csv data file to input/ directory
+For running the algorithm you need to follow three steps:
+#### Step 1: 
+Add .csv data file to input/ directory.
 
 	- Put your data file (.csv) into input/ directory
 	- Your data file must consists of the header row for name of the variables. Each row is a datapoint.
 
-### Step 2: 
-Update input_info.json file
+#### Step 2: 
+Update input_info.json file.
 
 	- num_of_bins: Maximum number of bins for disaggregating data
 	- least_num_of_datapoints_in_each_bin: Minimum number of datapoints in each bin
@@ -28,12 +28,15 @@ Update input_info.json file
 
 Before running the algorithm, please make sure the json format of the input_info.json file is [valid](https://jsonformatter.curiousconcept.com/).
 
-### Step 3: 
-Run the run.sh script 
+#### Step 3: 
+Run the run.sh script.
 
 # Output: 
+After running, three directories will be added. 
 
-Plots of Trend Simpson's Pairs will be available in output/ directory. For each pair, there is a PDF file. First plot is logistic fit to aggregated data. Second one is logistic for each of the bins. The third plots are histogram and heatplot of the Paradox and Conditioning variables. 
+	- temporary_files/
+	- output/
+	- store_results/
 
 The information about the bins, will be available in temporary_files/ directory. 
 
@@ -51,5 +54,16 @@ The information about the bins, will be available in temporary_files/ directory.
 	- R2improvements.csv: Total R^2 improvement for each variable. 
 	- ybar_tree.csv: Average value of Y in each bin. 
 
+
+Plots of Trend Simpson's Pairs will be available in output/ directory. For each pair, there is a PDF file. First plot is logistic fit to aggregated data. Second one is logistic for each of the bins. The third plots are histogram and heatplot of the Paradox and Conditioning variables. 
+
+
 The details of the algorithm will be printed in the terminal. You can use them as log. Beside that, all the informations about the logistic fits, simpson's pairs and deviance values are availabe in store_results/ directory as python pickle objects. You can use load functions in trend_simpsons.py file for loading them. 
+
+	- aggregated_vars_params.obj: Logistic fit information (Intercept, coefficients, errors) for aggregated data for different variables.
+	- disaggregated_vars_params.obj: For every pair of variables, information of logistic fit to disaggregated data. 
+	- simpsons_pairs.obj: Trend Simpson's Paradox pairs (before finalizing them by chi-squared test).
+	- loglikelihoods.obj: Loglikelihoods for full / null, aggregated / disaggregated models, for using to compute deviance of models and chi-squared test. 
+
+
 
