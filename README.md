@@ -6,30 +6,30 @@ More details about the algorithm is available in our paper on ICWSM 2018, "Using
 
 ## Input and Running: 
 	For running the algorithm you need to do the following:
-		Step 1: Add .csv data file to input/ directory
+	Step 1: Add .csv data file to input/ directory
 
-			- Put your data file (.csv) into input/ directory
-			- Your data file must consists of the header row for name of the variables, each row is a datapoint.
-			- .csv datafile (with first row column names) 
-			- Optional binning parameters 
-			  - Number of bins (nbins)
-			  - Minimum number of datapoint per bin (mindatapoints)
-			  - Lambda parameter (smaller lambda => finer binning (lambda)
+		- Put your data file (.csv) into input/ directory
+		- Your data file must consists of the header row for name of the variables, each row is a datapoint.
+		- .csv datafile (with first row column names) 
+		- Optional binning parameters 
+		  - Number of bins (nbins)
+		  - Minimum number of datapoint per bin (mindatapoints)
+		  - Lambda parameter (smaller lambda => finer binning (lambda)
 
-		Step 2: Update input_info.json file
+	Step 2: Update input_info.json file
 
-			- num_of_bins: Maximum number of bins for disaggregating data
-			- least_num_of_datapoints_in_each_bin: Minimum number of datapoints in each bin
-			- target_variable: name of the target variable in input .csv file
-			- target_variable_column: Column number of target variable in .csv file (zero-based).
-			- level_of_significance: Level of significance for chi-square deviance test
-			- csv_file_name: Name of the file you put to the input/ directory in step 1
-			- ignore_columns: An array of name of the variables for not including them in the algorithm variables. You should list all the columns with string or float values.
-			- log_scales: A dictionary of variable name to boolean value. Which shows you prefer log scale for axis for that variable in output/ plots or not. 
+		- num_of_bins: Maximum number of bins for disaggregating data
+		- least_num_of_datapoints_in_each_bin: Minimum number of datapoints in each bin
+		- target_variable: name of the target variable in input .csv file
+		- target_variable_column: Column number of target variable in .csv file (zero-based).
+		- level_of_significance: Level of significance for chi-square deviance test
+		- csv_file_name: Name of the file you put to the input/ directory in step 1
+		- ignore_columns: An array of name of the variables for not including them in the algorithm variables. You should list all the columns with string or float values.
+		- log_scales: A dictionary of variable name to boolean value. Which shows you prefer log scale for axis for that variable in output/ plots or not. 
 
-			Before running the algorithm, please make sure the json format of the input_info.json file is valid using: https://jsonformatter.curiousconcept.com/
+		Before running the algorithm, please make sure the json format of the input_info.json file is valid using: https://jsonformatter.curiousconcept.com/
 
-		Step 3: Run the run.sh script 
+	Step 3: Run the run.sh script 
 
 ## Output: 
 	Plots of Trend Simpson's Pairs will be available in output/ directory. For each pair, there is a PDF file. First plot is logistic fit to aggregated data. Second one is logistic for for each of the bins. The third plots are histogram and heatplot of the Paradox and Conditioning variables. 
