@@ -63,6 +63,12 @@ def different_vals_of(var):
 
 
 def read_input_info():
+    print ""
+    print "######################################"
+    print "## Reading Data and Input_info file ##"
+    print "######################################"
+    print ""
+
     with open("../input_info.json", 'r') as f:
         input_json_info = json.load(f)
     target_variable = input_json_info["target_variable"]
@@ -71,6 +77,8 @@ def read_input_info():
     name_of_the_variables = read_the_csv_file("../input/" + input_json_info["csv_file_name"] + ".csv", target_variable, input_json_info["ignore_columns"])
     read_the_bining_file("../temporary_files/" + input_json_info["csv_file_name"] + "/bins.csv")
     log_scales = input_json_info["log_scales"]
+
+    print "Reading complete."
 
     return target_variable, level_of_significance, name_of_the_variables, log_scales
 
@@ -117,12 +125,18 @@ def compute_mean_std(var, lvar, rvar, cond = -1, lcond = -1, rcond = -1, confide
 
 
 def draw(trend_simpsons_pair, aggregated_vars_params, disaggregated_vars_params, log_scales, max_group = 10):
+    print ""
+    print "###################################"
+    print "## Drawing Finalized Pairs plots ##"
+    print "###################################"
+    print ""
+
     for var, cond in trend_simpsons_pair:
     	# Making first page
     	print "Making", str(var + '-vs-' + cond + '.pdf'), " file "
     	if disaggregated_vars_params[var + "," + cond]["params"] == []:
     		continue
-        pp = PdfPages("../output/" + var + '-vs-' + cond + '.pdf') #TODO
+        pp = PdfPages("../output/" + var + '-vs-' + cond + '.pdf')
         plt.figure() 
         plt.axis('off')
         text = var + " with conditioning on " + cond 
@@ -167,8 +181,6 @@ def draw(trend_simpsons_pair, aggregated_vars_params, disaggregated_vars_params,
         coefs_ind = 0
         for ind in range(len(conditioning_groups) - 1):
             X = df.loc[(df[cond] > conditioning_groups[ind]) & (df[cond] <= conditioning_groups[ind + 1])][var].values
-            if len(X) < 100:
-                continue
             if ind >= max_group:
                 break
             X_lables = possible_values[(bisect.bisect_left(possible_values, X.min()) - 1):(bisect.bisect_right(possible_values, X.max()) + 1)]
@@ -261,7 +273,7 @@ def draw(trend_simpsons_pair, aggregated_vars_params, disaggregated_vars_params,
 ########################################################
 
 def store_info(file_name, obj):
-    with open("../store_results/" + file_name, 'wb') as handle: #TODO
+    with open("../store_results/" + file_name, 'wb') as handle: 
         pickle.dump(obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
@@ -271,7 +283,7 @@ def store_all_info(trend_simpsons_pairs, aggregated_vars_params, disaggregated_v
     store_info("disaggregated_vars_params.obj", disaggregated_vars_params)
 
 def load_info(file_name):
-    with open("../store_results/" + file_name, 'rb') as handle: #TODO
+    with open("../store_results/" + file_name, 'rb') as handle:
         obj = pickle.load(handle)
     return obj
 
@@ -321,6 +333,12 @@ def logistic_regression(X, Y):
 
 
 def find_trend_simpsons_pairs(pairs):
+    print ""
+    print "###################"
+    print "## Finding Pairs ##"
+    print "###################"
+    print ""
+
     trend_simpsons_pairs = []
     aggregated_vars_params = {}
     disaggregated_vars_params = {}
@@ -330,7 +348,7 @@ def find_trend_simpsons_pairs(pairs):
         disagg_sign = 0
 
         print ""
-        print "*** Running Logistic Regression on", var, "***"
+        print "Running Logistic Regression on", var
         if var in aggregated_vars_params:
             agg_params, agg_pvalues, agg_error = aggregated_vars_params[var]["params"], aggregated_vars_params[var]["pvalues"], aggregated_vars_params[var]["error"]
         else:
@@ -346,8 +364,7 @@ def find_trend_simpsons_pairs(pairs):
 
         #print "Coefficient: ", agg_params[1], "(", agg_pvalues[1], "), ", " Intercept: ", agg_params[0], "(", agg_pvalues[0] ,")", " Mean of errors: ", agg_error
         
-        print ""
-        print "*** Running Logistic Regression on", var, "conditioning", cond, "***"
+        print "Running Logistic Regression on", var, "conditioning", cond
         disagg_params = []
         disagg_pvalues = []
         disagg_errors = []
@@ -355,9 +372,6 @@ def find_trend_simpsons_pairs(pairs):
         conditioning_groups = different_vals_of(cond)
         for ind in range(len(conditioning_groups) - 1):
             the_df = df.loc[(df[cond] > conditioning_groups[ind]) & (df[cond] <= conditioning_groups[ind + 1])]
-            if len(the_df) < 100:
-                print ">>>>>>>>>>> BINNING :", "len(df[(df[", cond ,"] > ", conditioning_groups[ind], ") & (df[", cond, "] <= ", conditioning_groups[ind + 1], ")]) = ", len(the_df)
-                continue
             X = the_df[var].values
             X = np.array([X]).T
             X = sm.tools.tools.add_constant(X, has_constant='add')
@@ -387,9 +401,11 @@ def find_trend_simpsons_pairs(pairs):
     return trend_simpsons_pairs, aggregated_vars_params, disaggregated_vars_params
 
 def show_deviance_ranking(pairs, deviance_ranking):
+    print ""
     print "######################################################"
     print "## Deviance improvement ranking for finalized pairs ##"
     print "######################################################"
+    print ""
 
     mvar = np.unique([i[0] for i in pairs])
     for var in mvar: 
@@ -420,9 +436,11 @@ def ranking_deviance(finalized_pairs):
 
 
 def chi_sq_deviance():
+    print ""
     print "################################################################################"
     print "## Applying Chi-squared Deviance Test to all pairs and finding finalized ones ##"
     print "################################################################################"
+    print ""
 
     tmp = load_info("loglikelihoods.obj")
     
@@ -453,9 +471,11 @@ def chi_sq_deviance():
 
 
 def deviance_all_pairs(pairs, aggregated_vars_params, disaggregated_vars_params):
+    print ""
     print "##############################################################################################"
     print "## Computing Loglikelihood for full / null, aggregated / disaggregated models for all pairs ##"
     print "##############################################################################################"
+    print ""
 
     theta_0 = np.mean(df[target_variable].values)
 
@@ -499,8 +519,6 @@ def deviance_all_pairs(pairs, aggregated_vars_params, disaggregated_vars_params)
         for ind in range(len(conditioning_groups) - 1):
             the_df = df.loc[(df[cond] > conditioning_groups[ind]) & (df[cond] <= conditioning_groups[ind + 1])]
             theta_1 = np.mean(the_df[target_variable].values)
-            if len(the_df) < 100:
-                continue
             for val, y_i in zip(the_df[var].values, the_df[target_variable].values):
                 y_hat_i = np.sum(1 / (1 + np.exp(-(coefdisagg[disagg_ind] * val + interdisagg[disagg_ind]))))
                 if y_i:
@@ -522,6 +540,9 @@ def deviance_all_pairs(pairs, aggregated_vars_params, disaggregated_vars_params)
 
 
 if __name__ == "__main__":
+    print "---------------------------------------------------------------------------------------------------"
+    print "|                            * TREND SIMPSON'S PARADOX ALGORITHM *                                |"
+    print "---------------------------------------------------------------------------------------------------"
     # Reading info from input_info.txt
     target_variable, level_of_significance, name_of_the_variables, log_scales = read_input_info()
 
