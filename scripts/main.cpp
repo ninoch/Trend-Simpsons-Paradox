@@ -220,7 +220,8 @@ int main(int argc, char* argv[])
         pu2 = pu;
         pl1 = pl;
         pu1 = split;
-        mindatapoints_feature = min(cumcount[0][pu1],cumcount[0][pu2]);
+        mindatapoints_feature = min(cumcount[0][pu1], cumcount[0][pu2] - cumcount[0][pu1]);
+            
         
         // iii: calculate the rest of the splits until the stopping condition has been reached
         for(int nbins_feature = 2; ;nbins_feature ++)
@@ -241,13 +242,16 @@ int main(int argc, char* argv[])
                     break;
                 }
             if(mindatapoints_stopping == true) // min number of datapoints optimization
+            {
+                if(mindatapoints_feature > min(cumcount[0][pu1], cumcount[0][pu2] - cumcount[0][pu1]))
+                    mindatapoints_feature = min(cumcount[0][pu1], cumcount[0][pu2] - cumcount[0][pu1]);
                 if(mindatapoints_feature < mindatapoints)
                 {
                     splits.pop_back(); // remove the last split as it has resulted in a partition with less than mindatapoints
                     cout << "     - mindatapoints: " << mindatapoints_feature << " datatpoints in next split (< " << mindatapoints << "); breaking" << endl;
                     break;
                 }
-
+            }
             // output the information
             cout << "     - [" << pl << "," << pu << "] split into [" << pl << "," << split << "] and [" << pl2 << "," << pu << "], ";
             cout << "R2 = " << R2_improvement << endl; //<< ", DL = " << DL.back() << endl;
@@ -292,8 +296,6 @@ int main(int argc, char* argv[])
             pu2 = pu;
             pl1 = pl;
             pu1 = split;
-            if(mindatapoints_feature > min(cumcount[0][pu1],cumcount[0][pu2]))
-                mindatapoints_feature = min(cumcount[0][pu1],cumcount[0][pu2]);
             
             // e: update the R2 improvement and DL
             update_R2_DL(best_R2_improvement, R2_improvements, R2, DL, lambda);
