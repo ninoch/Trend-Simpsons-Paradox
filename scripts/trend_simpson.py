@@ -56,7 +56,7 @@ def read_the_bining_file(file_name):
 
 def different_vals_of(var):
     if var in possible_values_df:
-        arr = possible_values_df[var]
+        arr = copy.copy(possible_values_df[var])
         arr[0] = arr[0] - 1
         return list(arr)
     return None
@@ -233,7 +233,7 @@ def draw(trend_simpsons_pair, aggregated_vars_params, disaggregated_vars_params,
 
         cmap1 = cm.bwr
         cmap1.set_bad('lightgray', 1.)
-        im = ax[0].pcolormesh(np.array([possible_values[1:]] * (len(conditioning_groups) - 1)), np.array([conditioning_groups[1:]] * (len(possible_values) - 1)).T, mat_mean,
+        im = ax[0].pcolormesh(np.array([possible_values] * len(conditioning_groups)), np.array([conditioning_groups] * len(possible_values)).T, mat_mean,
 	                            vmin=mat_mean.min() - 0.01,
 	                            vmax=mat_mean.max() + 0.01,
 	                            cmap = cmap1)
@@ -246,7 +246,7 @@ def draw(trend_simpsons_pair, aggregated_vars_params, disaggregated_vars_params,
 
         cmap2 = cm.YlGn
         cmap2.set_bad('lightgray', 1.)
-        im = ax[1].pcolormesh(np.array([possible_values[1:]] * (len(conditioning_groups) - 1)), np.array([conditioning_groups[1:]] * (len(possible_values) - 1)).T, mat_freq,
+        im = ax[1].pcolormesh(np.array([possible_values] * len(conditioning_groups)), np.array([conditioning_groups] * len(possible_values)).T, mat_freq,
 	                            norm=clrs.LogNorm(vmin=1, vmax=mat_freq.max()),
 	                            cmap = cmap2)
 
@@ -546,7 +546,8 @@ if __name__ == "__main__":
     # Reading info from input_info.txt
     target_variable, level_of_significance, name_of_the_variables, log_scales = read_input_info()
 
-    # Finding all Trend Simpson's Pairs 
+
+    # Finding all Trend Simpson's Pairs
     pairs = set_paradox_conditioning_pairs(name_of_the_variables)
     trend_simpsons_pairs, aggregated_vars_params, disaggregated_vars_params = find_trend_simpsons_pairs(pairs)
     store_all_info(trend_simpsons_pairs, aggregated_vars_params, disaggregated_vars_params)
