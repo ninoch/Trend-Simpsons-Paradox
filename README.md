@@ -9,7 +9,7 @@ Please cite our paper if you use this code in your own work:
 	@article{alipourfard2018using,
 	  title={Using Simpson's Paradox to Discover Interesting Patterns in Behavioral Data},
 	  author={Alipourfard, Nazanin and Fennell, Peter G and Lerman, Kristina},
-	  journal={arXiv preprint arXiv:1805.03094},
+	  booktitle={Twelfth International AAAI Conference on Web and Social Media (ICWSM)},
 	  year={2018}
 	}
 
