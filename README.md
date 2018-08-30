@@ -3,7 +3,15 @@
 We describe a data-driven discovery method that leverages Simpson's paradox to uncover interesting patterns in behavioral data. Our method systematically disaggregates data to identify subgroups within a population whose behavior deviates significantly from the rest of the population. 
 Given an outcome of interest and a set of covariates, the method follows three steps. First, it disaggregates data into subgroups, by conditioning on a particular covariate, so as minimize the variation of the outcome within the subgroups. Next, it models the outcome as a linear function of another covariate, both in the subgroups and in the aggregate data. Finally, it compares trends to identify disaggregations that produce subgroups with different behaviors from the aggregate.
 
-More details about the algorithm is available in our paper on ICWSM 2018: "Using Simpson’s Paradox to Discover Interesting Patterns in Behavioral Data".
+More details about the algorithm is available in our paper on ICWSM 2018: "Using Simpson’s Paradox to Discover Interesting Patterns in Behavioral Data". 
+Please cite our paper if you use this code in your own work:
+
+	@article{alipourfard2018using,
+	  title={Using Simpson's Paradox to Discover Interesting Patterns in Behavioral Data},
+	  author={Alipourfard, Nazanin and Fennell, Peter G and Lerman, Kristina},
+	  journal={arXiv preprint arXiv:1805.03094},
+	  year={2018}
+	}
 
 
 # Input and Running: 
