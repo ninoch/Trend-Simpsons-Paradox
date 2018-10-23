@@ -75,5 +75,5 @@ The details of the algorithm will be printed in the terminal. You can use them a
 
 
 #### Notes:
-Please keep in mind that since we are using c++, the end-of-line is really important. Since [the end-of-line depends on OS](https://www.loginradius.com/engineering/eol-end-of-line-or-newline-characters/), you can use "cleaning_end_of_lines.py" script to clean up the end-of-lines. 
+Please keep in mind that since we are using c++, the end-of-line is really important. Since [the end-of-line depends on OS](https://www.loginradius.com/engineering/eol-end-of-line-or-newline-characters/), if your data is generated in different OS, and you are runnig this code on another OS, consider using "[cleaning_end_of_lines.py](https://github.com/ninoch/Trend-Simpsons-Paradox/blob/master/scripts/cleaning_end_of_lines.py)" script to clean up the end-of-lines. 
 
