@@ -74,4 +74,6 @@ The details of the algorithm will be printed in the terminal. You can use them a
 	- loglikelihoods.obj: Loglikelihoods for full / null, aggregated / disaggregated models, for using to compute deviance of models and chi-squared test. 
 
 
+#### Notes:
+Please keep in mind that since we are using c++, the end-of-line is really important. Since [the end-of-line depends on OS](https://www.loginradius.com/engineering/eol-end-of-line-or-newline-characters/), you can use "cleaning_end_of_lines.py" script to clean up the end-of-lines. 
 
