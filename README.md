@@ -32,7 +32,7 @@ Update input_info.json file.
 	- level_of_significance: Level of significance for chi-square deviance test
 	- csv_file_name: Name of the file you put to the input/ directory in step 1
 	- ignore_columns: An array of name of the variables for not including them in the algorithm variables. You should list all the columns with string or float values.
-	- log_scales: A dictionary of variable name to boolean value. Which shows you prefer log scale for axis for that variable in output/ plots or not. 
+	- log_scales: A list of variable name, which shows you prefer log scale for axis for that variable in output/ plots.
 
 Before running the algorithm, please make sure the json format of the input_info.json file is [valid](https://jsonformatter.curiousconcept.com/).
 
