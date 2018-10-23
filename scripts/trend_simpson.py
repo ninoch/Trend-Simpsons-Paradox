@@ -76,7 +76,14 @@ def read_input_info():
     
     name_of_the_variables = read_the_csv_file("../input/" + input_json_info["csv_file_name"] + ".csv", target_variable, input_json_info["ignore_columns"])
     read_the_bining_file("../temporary_files/" + input_json_info["csv_file_name"] + "/bins.csv")
-    log_scales = input_json_info["log_scales"]
+
+    list_of_log_scales = input_json_info["log_scales"]
+    log_scales = dict()
+    for vname in name_of_the_variables:
+        if vname in list_of_log_scales:
+            log_scales[vname] = True
+        else:
+            log_scales[vname] = False
 
     print "Reading complete."
 
