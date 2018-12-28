@@ -12,6 +12,7 @@ Please cite our paper if you use this code in your own work:
 	  booktitle={Twelfth International AAAI Conference on Web and Social Media (ICWSM)},
 	  year={2018}
 	}
+You can access processed StackExchange data from [here](https://drive.google.com/file/d/1WtDE6mcsi1GfYui4l1dMRkQefv61CicJ/view)
 
 
 # Input and Running: 
