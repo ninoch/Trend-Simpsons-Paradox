@@ -28,10 +28,10 @@ mkdir -p store_results
 
 printf "\n *** BASH: Run the binning algorithm and store results in temporary_files/ \n"
 
-cd scripts
+cd scripts || exit
 g++ main.cpp
 make
-./cppexe -infile:../input/$csv_file_name".csv" -outfolder:../temporary_files/$csv_file_name -ycol:$target_variable_column -nbins:$num_of_bins -mindatapoints:$least_num_of_datapoints
+./cppexe -infile:../input/"$csv_file_name"".csv" -outfolder:../temporary_files/"$csv_file_name" -ycol:"$target_variable_column" -nbins:"$num_of_bins" -mindatapoints:"$least_num_of_datapoints"
 
 ######################################
 #       FINDING SIMPSONS PAIRS       #
