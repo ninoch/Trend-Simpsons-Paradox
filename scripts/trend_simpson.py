@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd 
+import pandas as pd
 from scipy import stats
 import statsmodels.api as sm
 import bisect
@@ -8,8 +8,6 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.backends.backend_pdf import PdfPages
 import pickle
-import matplotlib.ticker as ticker
-from matplotlib.ticker import FormatStrFormatter
 from scipy.stats import chi2
 import matplotlib.colors as clrs
 import json
@@ -17,22 +15,23 @@ import json
 df = pd.DataFrame()
 possible_values_df = dict()
 target_variable = None
-markers = ['o','v','+','s','p','x','h','d','o','v','+','s','p','x','h','d']
+markers = ['o', 'v', '+', 's', 'p', 'x', 'h', 'd', 'o', 'v', '+', 's', 'p', 'x', 'h', 'd']
+
 
 ######################################################
 ##                 INPUT FUNCTIONS                  ##
 ######################################################
 
 
-def read_the_csv_file(file_name, tar_var, drop_variables = None, filter_variables = None):
+def read_the_csv_file(file_name, tar_var, drop_variables=None, filter_variables=None):
     global df
     df = pd.read_csv(file_name)
     if drop_variables:
         df = df.drop(drop_variables, axis=1)
-    if filter_variables: 
+    if filter_variables:
         df = df.loc[filter_variables]
     name_of_variables = df.columns.values
-    
+
     var = list(name_of_variables)
     target_variable = tar_var
     var.remove(target_variable)
@@ -63,18 +62,19 @@ def different_vals_of(var):
 
 
 def read_input_info():
-    print ""
-    print "######################################"
-    print "## Reading Data and Input_info file ##"
-    print "######################################"
-    print ""
+    print("")
+    print("######################################")
+    print("## Reading Data and Input_info file ##")
+    print("######################################")
+    print("")
 
     with open("../input_info.json", 'r') as f:
         input_json_info = json.load(f)
     target_variable = input_json_info["target_variable"]
     level_of_significance = input_json_info["level_of_significance"]
-    
-    name_of_the_variables = read_the_csv_file("../input/" + input_json_info["csv_file_name"] + ".csv", target_variable, input_json_info["ignore_columns"])
+
+    name_of_the_variables = read_the_csv_file("../input/" + input_json_info["csv_file_name"] + ".csv", target_variable,
+                                              input_json_info["ignore_columns"])
     read_the_bining_file("../temporary_files/" + input_json_info["csv_file_name"] + "/bins.csv")
 
     list_of_log_scales = input_json_info["log_scales"]
@@ -85,16 +85,17 @@ def read_input_info():
         else:
             log_scales[vname] = False
 
-    print "Reading complete."
+    print("Reading complete.")
 
     return target_variable, level_of_significance, name_of_the_variables, log_scales
+
 
 #####################################################
 ##                 PAIR FUNCTIONS                  ##
 #####################################################
 
 
-def set_paradox_conditioning_pairs(name_of_variables, paradox_vars = None, conditioning_vars = None, my_pairs = None):
+def set_paradox_conditioning_pairs(name_of_variables, paradox_vars=None, conditioning_vars=None, my_pairs=None):
     pairs = []
 
     if not paradox_vars:
@@ -119,54 +120,58 @@ def set_paradox_conditioning_pairs(name_of_variables, paradox_vars = None, condi
 ########################################################
 
 
-def compute_mean_std(var, lvar, rvar, cond = -1, lcond = -1, rcond = -1, confidence = 0.95):
+def compute_mean_std(var, lvar, rvar, cond=-1, lcond=-1, rcond=-1, confidence=0.95):
     a = []
     if cond == -1:
         a = df.loc[(df[var] > lvar) & (df[var] <= rvar)][target_variable].values
     else:
-        a = df.loc[(df[cond] > lcond) & (df[cond] <= rcond)].loc[(df[var] > lvar) & (df[var] <= rvar)][target_variable].values
+        a = df.loc[(df[cond] > lcond) & (df[cond] <= rcond)].loc[(df[var] > lvar) & (df[var] <= rvar)][
+            target_variable].values
     n = len(a)
     se = stats.sem(a)
-    h = se * stats.t._ppf((1+confidence)/2., n-1)
+    h = se * stats.t._ppf((1 + confidence) / 2., n - 1)
     return np.mean(a), h
 
 
-def draw(trend_simpsons_pair, aggregated_vars_params, disaggregated_vars_params, log_scales, max_group = 10):
-    print ""
-    print "###################################"
-    print "## Drawing Finalized Pairs plots ##"
-    print "###################################"
-    print ""
+def draw(trend_simpsons_pair, aggregated_vars_params, disaggregated_vars_params, log_scales, max_group=10):
+    print("")
+    print("###################################")
+    print("## Drawing Finalized Pairs plots ##")
+    print("###################################")
+    print("")
 
     for var, cond in trend_simpsons_pair:
-    	# Making first page
-    	print "Making", str(var + '-vs-' + cond + '.pdf'), " file "
-    	if disaggregated_vars_params[var + "," + cond]["params"] == []:
-    		continue
+        # Making first page
+        print("Making", str(var + '-vs-' + cond + '.pdf'), " file ")
+        if disaggregated_vars_params[var + "," + cond]["params"] == []:
+            continue
         pp = PdfPages("../output/" + var + '-vs-' + cond + '.pdf')
-        plt.figure() 
+        plt.figure()
         plt.axis('off')
-        text = var + " with conditioning on " + cond 
+        text = var + " with conditioning on " + cond
         plt.text(0.5, 0.5, text, ha='center', va='center')
         pp.savefig(bbox_inches='tight', papertype='a4')
-        plt.close() 
+        plt.close()
 
         # Drawing group plots
-        print "\t Drawing chart aggregated"
+        print("\t Drawing chart aggregated")
         plt.clf()
         coef, inter = aggregated_vars_params[var]["params"][1], aggregated_vars_params[var]["params"][0]
-            
+
         possible_values = different_vals_of(var)
         y_actual, y_err, y_hat = [], [], []
         for indx in range(len(possible_values) - 1):
             m, e = compute_mean_std(var, possible_values[indx], possible_values[indx + 1])
             y_actual.append(m)
             y_err.append(e)
-        
-        x_hat = np.arange((possible_values[0] + possible_values[1]) / 2, (possible_values[-2] + possible_values[-1]) / 2, float(possible_values[-1] - possible_values[0]) / 100.0)
+
+        x_hat = np.arange((possible_values[0] + possible_values[1]) / 2,
+                          (possible_values[-2] + possible_values[-1]) / 2,
+                          float(possible_values[-1] - possible_values[0]) / 100.0)
         y_hat = 1 / (1 + np.exp(-(coef * x_hat + inter)))
-        plt.plot(x_hat, y_hat, linewidth=1, linestyle='dashed', color='k',label='logistic fit')
-        plt.errorbar(np.array(np.array(possible_values[1:]) + np.array(possible_values[:-1])) / 2, y_actual, yerr=[y_err, y_err], alpha=0.75, color='black', label='data', fmt='o')
+        plt.plot(x_hat, y_hat, linewidth=1, linestyle='dashed', color='k', label='logistic fit')
+        plt.errorbar(np.array(np.array(possible_values[1:]) + np.array(possible_values[:-1])) / 2, y_actual,
+                     yerr=[y_err, y_err], alpha=0.75, color='black', label='data', fmt='o')
         plt.xlabel(var)
         plt.ylabel(target_variable)
 
@@ -178,11 +183,12 @@ def draw(trend_simpsons_pair, aggregated_vars_params, disaggregated_vars_params,
         pp.savefig(bbox_inches='tight', papertype='a4')
         plt.close()
 
-        print "\t Drawing chart disaggregated"
-        disaggregated_vars_params[var + "," + cond]["params"] = np.array(disaggregated_vars_params[var + "," + cond]["params"])
+        print("\t Drawing chart disaggregated")
+        disaggregated_vars_params[var + "," + cond]["params"] = np.array(
+            disaggregated_vars_params[var + "," + cond]["params"])
         coefs = disaggregated_vars_params[var + "," + cond]["params"][:, 1]
         inters = disaggregated_vars_params[var + "," + cond]["params"][:, 0]
-        
+
         plt.clf()
         conditioning_groups = different_vals_of(cond)
         coefs_ind = 0
@@ -190,60 +196,67 @@ def draw(trend_simpsons_pair, aggregated_vars_params, disaggregated_vars_params,
             X = df.loc[(df[cond] > conditioning_groups[ind]) & (df[cond] <= conditioning_groups[ind + 1])][var].values
             if ind >= max_group:
                 break
-            X_lables = possible_values[(bisect.bisect_left(possible_values, X.min()) - 1):(bisect.bisect_right(possible_values, X.max()) + 1)]
+            X_lables = possible_values[(bisect.bisect_left(possible_values, X.min()) - 1):(
+                        bisect.bisect_right(possible_values, X.max()) + 1)]
             y_actual, y_err = [], []
-            for indx in range(len(X_lables)-1): 
-                m, e = compute_mean_std(var, X_lables[indx], X_lables[indx + 1], cond, conditioning_groups[ind], conditioning_groups[ind + 1])
+            for indx in range(len(X_lables) - 1):
+                m, e = compute_mean_std(var, X_lables[indx], X_lables[indx + 1], cond, conditioning_groups[ind],
+                                        conditioning_groups[ind + 1])
                 y_actual.append(m)
                 y_err.append(e)
 
-            colorr = float(float(ind + 1)/float(min(max_group, len(conditioning_groups))))
-            plt.errorbar(np.array(np.array(X_lables[1:]) + np.array(X_lables[:-1])) / 2, y_actual, yerr=[y_err, y_err], color=(colorr,0,1.0 - colorr), alpha=0.75, fmt=markers[ind % len(markers)], label= '(' + str(conditioning_groups[ind]) + "-" + str(conditioning_groups[ind + 1]) + ']' )
-        	
+            colorr = float(float(ind + 1) / float(min(max_group, len(conditioning_groups))))
+            plt.errorbar(np.array(np.array(X_lables[1:]) + np.array(X_lables[:-1])) / 2, y_actual, yerr=[y_err, y_err],
+                         color=(colorr, 0, 1.0 - colorr), alpha=0.75, fmt=markers[ind % len(markers)],
+                         label='(' + str(conditioning_groups[ind]) + "-" + str(conditioning_groups[ind + 1]) + ']')
+
             if len(X_lables) > 1:
-                x_hat = np.arange((X_lables[0] + X_lables[1]) / 2, (X_lables[-2] + X_lables[-1]) / 2, float(X_lables[-1] - X_lables[0]) / 100.0)
+                x_hat = np.arange((X_lables[0] + X_lables[1]) / 2, (X_lables[-2] + X_lables[-1]) / 2,
+                                  float(X_lables[-1] - X_lables[0]) / 100.0)
                 y_hat = 1 / (1 + np.exp(-(coefs[coefs_ind] * x_hat + inters[coefs_ind])))
-                plt.plot(x_hat, y_hat, color=(colorr,0,1.0 - colorr), linewidth=1, linestyle='dashed')
+                plt.plot(x_hat, y_hat, color=(colorr, 0, 1.0 - colorr), linewidth=1, linestyle='dashed')
             coefs_ind += 1
 
         plt.xlabel(var)
         if log_scales[var]:
             plt.xscale('log')
-        
+
         plt.ylabel(target_variable)
         try:
-        	plt.legend(loc='best')
+            plt.legend(loc='best')
         except:
-        	pass
+            pass
         plt.title(var + " with conditioning on " + cond)
         pp.savefig(bbox_inches='tight', papertype='a4')
         plt.close()
 
-        # Drawing Pcolormesh Plot 
+        # Drawing Pcolormesh Plot
         mat_mean = np.zeros((len(conditioning_groups) - 1, len(possible_values) - 1))
         mat_freq = np.zeros((len(conditioning_groups) - 1, len(possible_values) - 1))
 
-        
-        print "\t Drawing pcolormesh plots"
+        print("\t Drawing pcolormesh plots")
         for x in range(len(possible_values) - 1):
             for y in range(len(conditioning_groups) - 1):
                 lvar, rvar = possible_values[x], possible_values[x + 1]
                 lcond, rcond = conditioning_groups[y], conditioning_groups[y + 1]
-                target_array = df.loc[(df[cond] > lcond) & (df[cond] <= rcond)].loc[(df[var] > lvar) & (df[var] <= rvar)][target_variable].values
+                target_array = \
+                df.loc[(df[cond] > lcond) & (df[cond] <= rcond)].loc[(df[var] > lvar) & (df[var] <= rvar)][
+                    target_variable].values
                 mat_mean[y][x] = np.mean(target_array)
-                mat_freq[y][x] = len(target_array) 
+                mat_freq[y][x] = len(target_array)
 
-        mat_mean = np.ma.masked_where(np.isnan(mat_mean),mat_mean)
+        mat_mean = np.ma.masked_where(np.isnan(mat_mean), mat_mean)
 
         plt.clf()
-        fig, ax = plt.subplots(ncols=2, sharex=True, sharey=True)#, gridspec_kw={'width_ratios':[1,1,1.25]})
+        fig, ax = plt.subplots(ncols=2, sharex=True, sharey=True)  # , gridspec_kw={'width_ratios':[1,1,1.25]})
 
         cmap1 = cm.bwr
         cmap1.set_bad('lightgray', 1.)
-        im = ax[0].pcolormesh(np.array([possible_values] * len(conditioning_groups)), np.array([conditioning_groups] * len(possible_values)).T, mat_mean,
-	                            vmin=mat_mean.min() - 0.01,
-	                            vmax=mat_mean.max() + 0.01,
-	                            cmap = cmap1)
+        im = ax[0].pcolormesh(np.array([possible_values] * len(conditioning_groups)),
+                              np.array([conditioning_groups] * len(possible_values)).T, mat_mean,
+                              vmin=mat_mean.min() - 0.01,
+                              vmax=mat_mean.max() + 0.01,
+                              cmap=cmap1)
 
         fig.colorbar(im, ax=ax[0])
         if log_scales[var]:
@@ -253,9 +266,10 @@ def draw(trend_simpsons_pair, aggregated_vars_params, disaggregated_vars_params,
 
         cmap2 = cm.YlGn
         cmap2.set_bad('lightgray', 1.)
-        im = ax[1].pcolormesh(np.array([possible_values] * len(conditioning_groups)), np.array([conditioning_groups] * len(possible_values)).T, mat_freq,
-	                            norm=clrs.LogNorm(vmin=1, vmax=mat_freq.max()),
-	                            cmap = cmap2)
+        im = ax[1].pcolormesh(np.array([possible_values] * len(conditioning_groups)),
+                              np.array([conditioning_groups] * len(possible_values)).T, mat_freq,
+                              norm=clrs.LogNorm(vmin=1, vmax=mat_freq.max()),
+                              cmap=cmap2)
 
         fig.colorbar(im, ax=ax[1])
         if log_scales[var]:
@@ -274,13 +288,12 @@ def draw(trend_simpsons_pair, aggregated_vars_params, disaggregated_vars_params,
         plt.close()
 
 
-
 ########################################################
 ##                 STORING FUNCTIONS                  ##
 ########################################################
 
 def store_info(file_name, obj):
-    with open("../store_results/" + file_name, 'wb') as handle: 
+    with open("../store_results/" + file_name, 'wb') as handle:
         pickle.dump(obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
@@ -289,10 +302,12 @@ def store_all_info(trend_simpsons_pairs, aggregated_vars_params, disaggregated_v
     store_info("aggregated_vars_params.obj", aggregated_vars_params)
     store_info("disaggregated_vars_params.obj", disaggregated_vars_params)
 
+
 def load_info(file_name):
     with open("../store_results/" + file_name, 'rb') as handle:
         obj = pickle.load(handle)
     return obj
+
 
 def load_all_info():
     trend_simpsons_pairs = load_info("simpsons_pairs.obj")
@@ -301,16 +316,18 @@ def load_all_info():
     paradox_ranking = load_info("paradox_ranking.obj")
     return trend_simpsons_pairs, aggregated_vars_params, disaggregated_vars_params, paradox_ranking
 
+
 ################################################################
 ##                 TREND SIMPSON'S FUNCTIONS                  ##
 ################################################################
 
-def sign(val, pval = 0):
+def sign(val, pval=0):
     if pval >= level_of_significance or val == 0:
         return 0
     elif val < 0:
         return -1
     return 1
+
 
 def compute_mean_of_error(lr, Y, X):
     delta = lr.predict(X)
@@ -318,21 +335,22 @@ def compute_mean_of_error(lr, Y, X):
     delta[inds] = 1 - delta[inds]
     return 1.0 - float(sum(delta) / float(len(delta)))
 
+
 def logistic_regression(X, Y):
     if max(Y) == min(Y):
         if max(Y) == 1:
-            return [20, 0], [0, 1], 0 # 
+            return [20, 0], [0, 1], 0  #
         else:
-            return [-20, 0], [0, 1], 0 # 
+            return [-20, 0], [0, 1], 0  #
 
-    logistic_model = sm.Logit(Y,X)
+    logistic_model = sm.Logit(Y, X)
     try:
-        lr = logistic_model.fit(maxiter=200, disp=False) 
-    except: # Singular Matrix
+        lr = logistic_model.fit(maxiter=200, disp=False)
+    except:  # Singular Matrix
         intercept = -1 * np.log((1 / np.mean(Y)) - 1)
-        return [intercept, 0], [0, 1], 0 #  
+        return [intercept, 0], [0, 1], 0  #
 
-    #print lr.summary()
+    # print lr.summary()
     pvals = lr.pvalues
     params = lr.params
 
@@ -340,11 +358,11 @@ def logistic_regression(X, Y):
 
 
 def find_trend_simpsons_pairs(pairs):
-    print ""
-    print "###################"
-    print "## Finding Pairs ##"
-    print "###################"
-    print ""
+    print("")
+    print("###################")
+    print("## Finding Pairs ##")
+    print("###################")
+    print("")
 
     trend_simpsons_pairs = []
     aggregated_vars_params = {}
@@ -354,10 +372,11 @@ def find_trend_simpsons_pairs(pairs):
         agg_sign = 0
         disagg_sign = 0
 
-        print ""
-        print "Running Logistic Regression on", var
+        print("")
+        print("Running Logistic Regression on", var)
         if var in aggregated_vars_params:
-            agg_params, agg_pvalues, agg_error = aggregated_vars_params[var]["params"], aggregated_vars_params[var]["pvalues"], aggregated_vars_params[var]["error"]
+            agg_params, agg_pvalues, agg_error = aggregated_vars_params[var]["params"], aggregated_vars_params[var][
+                "pvalues"], aggregated_vars_params[var]["error"]
         else:
             X = df[var].values
             X = np.array([X]).T
@@ -365,13 +384,14 @@ def find_trend_simpsons_pairs(pairs):
             Y = df[target_variable].values
             agg_params, agg_pvalues, agg_error = logistic_regression(X, Y)
             aggregated_vars_params[var] = {}
-            aggregated_vars_params[var]["params"], aggregated_vars_params[var]["pvalues"], aggregated_vars_params[var]["error"] = agg_params, agg_pvalues, agg_error
+            aggregated_vars_params[var]["params"], aggregated_vars_params[var]["pvalues"], aggregated_vars_params[var][
+                "error"] = agg_params, agg_pvalues, agg_error
 
         agg_sign = sign(agg_params[1], agg_pvalues[1])
 
-        #print "Coefficient: ", agg_params[1], "(", agg_pvalues[1], "), ", " Intercept: ", agg_params[0], "(", agg_pvalues[0] ,")", " Mean of errors: ", agg_error
-        
-        print "Running Logistic Regression on", var, "conditioning", cond
+        # print "Coefficient: ", agg_params[1], "(", agg_pvalues[1], "), ", " Intercept: ", agg_params[0], "(", agg_pvalues[0] ,")", " Mean of errors: ", agg_error
+
+        print("Running Logistic Regression on", var, "conditioning", cond)
         disagg_params = []
         disagg_pvalues = []
         disagg_errors = []
@@ -388,43 +408,45 @@ def find_trend_simpsons_pairs(pairs):
             disagg_params.append(pars)
             disagg_pvalues.append(pval)
             disagg_errors.append(err)
-            
-            #print "For group", (ind + 1), " : Coefficient: ", pars[1], "(", pval[1], "), ", " Intercept: ", pars[0], "(", pval[0] ,")", " Mean of errors: ", err
+
+            # print "For group", (ind + 1), " : Coefficient: ", pars[1], "(", pval[1], "), ", " Intercept: ", pars[0], "(", pval[0] ,")", " Mean of errors: ", err
 
             disagg_sign += sign(pars[1], pval[1])
-        
+
         disagg_sign = sign(float(disagg_sign) / float(len(disagg_params)))
         disaggregated_vars_params[var + "," + cond] = {}
         disaggregated_vars_params[var + "," + cond]["params"] = disagg_params
-        disaggregated_vars_params[var + "," + cond]["pvalues"] = disagg_pvalues 
+        disaggregated_vars_params[var + "," + cond]["pvalues"] = disagg_pvalues
         disaggregated_vars_params[var + "," + cond]["errors"] = disagg_errors
 
         if agg_sign != 0 and (disagg_sign != agg_sign):
-            print ""
-            print ">>>>> Trend Simpson's instance for var", var, "with conditioning on", cond, "SIGNS: ", agg_sign, disagg_sign, "<<<<<"
-            print ""
+            print("")
+            print(">>>>> Trend Simpson's instance for var", var, "with conditioning on", cond, "SIGNS: ", agg_sign,
+                  disagg_sign, "<<<<<")
+            print("")
             trend_simpsons_pairs.append([var, cond])
 
     return trend_simpsons_pairs, aggregated_vars_params, disaggregated_vars_params
 
+
 def show_deviance_ranking(pairs, deviance_ranking):
-    print ""
-    print "######################################################"
-    print "## Deviance improvement ranking for finalized pairs ##"
-    print "######################################################"
-    print ""
+    print("")
+    print("######################################################")
+    print("## Deviance improvement ranking for finalized pairs ##")
+    print("######################################################")
+    print("")
 
     mvar = np.unique([i[0] for i in pairs])
-    for var in mvar: 
+    for var in mvar:
         for key, dr in deviance_ranking[::-1]:
             if key.startswith(var + ","):
-                print key, float("{0:.2f}".format(dr))
-        print "------------------------------"
+                print(key, float("{0:.2f}".format(dr)))
+        print("------------------------------")
 
 
 def ranking_deviance(finalized_pairs):
     tmp = load_info("loglikelihoods.obj")
-    
+
     null_agg = tmp['null_agg']
     full_agg = tmp['full_agg']
     null_disagg = tmp['null_disagg']
@@ -433,31 +455,31 @@ def ranking_deviance(finalized_pairs):
 
     for var, cond in finalized_pairs:
         key = var + "," + cond
-        #n_a = null_agg[var]
-        f_a = full_agg[var] # remove
+        # n_a = null_agg[var]
+        f_a = full_agg[var]  # remove
         f_da = full_disagg[key]
 
         rank[key] = 1 - float(float(f_da) / float(f_a))
-        
-    return sorted(rank.iteritems(), key=lambda (k,v): (v,k))
+
+    return sorted(rank.items(), key=lambda k, v: (v, k))
 
 
 def chi_sq_deviance():
-    print ""
-    print "################################################################################"
-    print "## Applying Chi-squared Deviance Test to all pairs and finding finalized ones ##"
-    print "################################################################################"
-    print ""
+    print("")
+    print("################################################################################")
+    print("## Applying Chi-squared Deviance Test to all pairs and finding finalized ones ##")
+    print("################################################################################")
+    print("")
 
     tmp = load_info("loglikelihoods.obj")
-    
+
     null_agg = tmp['null_agg']
     full_agg = tmp['full_agg']
     null_disagg = tmp['null_disagg']
     full_disagg = tmp['full_disagg']
     finalized_pairs = []
 
-    for key, n_da in null_disagg.iteritems():
+    for key, n_da in null_disagg.items():
         f_da = full_disagg[key]
         var, cond = key.split(',')[0], key.split(',')[1]
         n_a = null_agg[var]
@@ -467,22 +489,24 @@ def chi_sq_deviance():
         df_agg = 1
         chi_dagg = 2 * (f_da - n_da)
         df_dagg = len(different_vals_of(cond))
-        print "Chi-squared test for pair", key, ": agg = ", (1 - chi2.cdf(chi_agg, df_agg)), " disagg = ", (1 - chi2.cdf(chi_dagg, df_dagg))
+        print("Chi-squared test for pair", key, ": agg = ", (1 - chi2.cdf(chi_agg, df_agg)), " disagg = ",
+              (1 - chi2.cdf(chi_dagg, df_dagg)))
 
-        if f_a < f_da and (1 - chi2.cdf(chi_agg, df_agg)) < level_of_significance and (1 - chi2.cdf(chi_dagg, df_dagg)) < level_of_significance:
-            print "\t Pass"
+        if f_a < f_da and (1 - chi2.cdf(chi_agg, df_agg)) < level_of_significance and (
+                1 - chi2.cdf(chi_dagg, df_dagg)) < level_of_significance:
+            print("\t Pass")
             finalized_pairs.append((var, cond))
         else:
-            print "\t Not pass"
+            print("\t Not pass")
     return finalized_pairs
 
 
 def deviance_all_pairs(pairs, aggregated_vars_params, disaggregated_vars_params):
-    print ""
-    print "##############################################################################################"
-    print "## Computing Loglikelihood for full / null, aggregated / disaggregated models for all pairs ##"
-    print "##############################################################################################"
-    print ""
+    print("")
+    print("##############################################################################################")
+    print("## Computing Loglikelihood for full / null, aggregated / disaggregated models for all pairs ##")
+    print("##############################################################################################")
+    print("")
 
     theta_0 = np.mean(df[target_variable].values)
 
@@ -492,19 +516,19 @@ def deviance_all_pairs(pairs, aggregated_vars_params, disaggregated_vars_params)
     full_disagg = dict()
 
     for var, cond in pairs:
-    	print "Computing Deviance for pair [", var, ", ", cond, "]"
+        print("Computing Deviance for pair [", var, ", ", cond, "]")
 
-    	# Aggregated Deviance 
+        # Aggregated Deviance
         if var not in null_agg:
-    	    coef, inter = aggregated_vars_params[var]["params"][1], aggregated_vars_params[var]["params"][0]
+            coef, inter = aggregated_vars_params[var]["params"][1], aggregated_vars_params[var]["params"][0]
 
             null_agg_tmp = 0
             full_agg_tmp = 0
             for val, y_i in zip(df[var].values, df[target_variable].values):
                 y_hat_i = np.sum(1 / (1 + np.exp(-(coef * val + inter))))
-                if y_i: 
+                if y_i:
                     null_agg_tmp += y_i * np.log(theta_0)
-                    full_agg_tmp += y_i * np.log(y_hat_i) 
+                    full_agg_tmp += y_i * np.log(y_hat_i)
                 else:
                     null_agg_tmp += (1 - y_i) * np.log(1 - theta_0)
                     full_agg_tmp += (1 - y_i) * np.log(1 - y_hat_i)
@@ -512,9 +536,9 @@ def deviance_all_pairs(pairs, aggregated_vars_params, disaggregated_vars_params)
             null_agg[var] = null_agg_tmp
             full_agg[var] = full_agg_tmp
 
-
         # Disaggregated Deviance
-        disaggregated_vars_params[var + "," + cond]["params"] = np.array(disaggregated_vars_params[var + "," + cond]["params"])
+        disaggregated_vars_params[var + "," + cond]["params"] = np.array(
+            disaggregated_vars_params[var + "," + cond]["params"])
         coefdisagg = disaggregated_vars_params[var + "," + cond]["params"][:, 1]
         interdisagg = disaggregated_vars_params[var + "," + cond]["params"][:, 0]
 
@@ -529,50 +553,49 @@ def deviance_all_pairs(pairs, aggregated_vars_params, disaggregated_vars_params)
             for val, y_i in zip(the_df[var].values, the_df[target_variable].values):
                 y_hat_i = np.sum(1 / (1 + np.exp(-(coefdisagg[disagg_ind] * val + interdisagg[disagg_ind]))))
                 if y_i:
-                    null_disagg_tmp += y_i * np.log(theta_1) 
+                    null_disagg_tmp += y_i * np.log(theta_1)
                     full_disagg_tmp += y_i * np.log(y_hat_i)
                 else:
                     null_disagg_tmp += (1 - y_i) * np.log(1 - theta_1)
                     full_disagg_tmp += (1 - y_i) * np.log(1 - y_hat_i)
-
 
             disagg_ind += 1
 
         null_disagg[var + "," + cond] = null_disagg_tmp
         full_disagg[var + "," + cond] = full_disagg_tmp
 
-        print "\t aggregated( null / full ):", null_agg[var], full_agg[var], " disaggregated( null / full ):", null_disagg[var + "," + cond], full_disagg[var + "," + cond]
+        print("\t aggregated( null / full ):", null_agg[var], full_agg[var], " disaggregated( null / full ):",
+              null_disagg[var + "," + cond], full_disagg[var + "," + cond])
 
-    store_info("loglikelihoods.obj", {'null_agg': null_agg, 'full_agg': full_agg, 'null_disagg': null_disagg, 'full_disagg': full_disagg})
+    store_info("loglikelihoods.obj",
+               {'null_agg': null_agg, 'full_agg': full_agg, 'null_disagg': null_disagg, 'full_disagg': full_disagg})
 
 
 if __name__ == "__main__":
-    print "---------------------------------------------------------------------------------------------------"
-    print "|                            * TREND SIMPSON'S PARADOX ALGORITHM *                                |"
-    print "---------------------------------------------------------------------------------------------------"
+    print("---------------------------------------------------------------------------------------------------")
+    print("|                            * TREND SIMPSON'S PARADOX ALGORITHM *                                |")
+    print("---------------------------------------------------------------------------------------------------")
     # Reading info from input_info.txt
     target_variable, level_of_significance, name_of_the_variables, log_scales = read_input_info()
-
 
     # Finding all Trend Simpson's Pairs
     pairs = set_paradox_conditioning_pairs(name_of_the_variables)
     trend_simpsons_pairs, aggregated_vars_params, disaggregated_vars_params = find_trend_simpsons_pairs(pairs)
     store_all_info(trend_simpsons_pairs, aggregated_vars_params, disaggregated_vars_params)
     # To prevent computing trend simpson's pairs again, you can load results from your previous run
-    #trend_simpsons_pairs, aggregated_vars_params, disaggregated_vars_params, paradox_ranking = load_all_info() 
-    print "Number of all pairs found as Simpson's: ", len(trend_simpsons_pairs)
-    print trend_simpsons_pairs
+    # trend_simpsons_pairs, aggregated_vars_params, disaggregated_vars_params, paradox_ranking = load_all_info()
+    print("Number of all pairs found as Simpson's: ", len(trend_simpsons_pairs))
+    print(trend_simpsons_pairs)
 
     # Finding finalized pairs based on Deviace chi-squared measure
     deviance_all_pairs(trend_simpsons_pairs, aggregated_vars_params, disaggregated_vars_params)
     finalized_pairs = chi_sq_deviance()
-    print "Number of all finalized pairs: ", len(finalized_pairs)
-    print finalized_pairs
+    print("Number of all finalized pairs: ", len(finalized_pairs))
+    print(finalized_pairs)
 
-    # Ranking for pairs 
+    # Ranking for pairs
     deviance_ranking = ranking_deviance(finalized_pairs)
     show_deviance_ranking(finalized_pairs, deviance_ranking)
-    
+
     # Drawing charts for finalized pairs
     draw(finalized_pairs, aggregated_vars_params, disaggregated_vars_params, log_scales)
-
