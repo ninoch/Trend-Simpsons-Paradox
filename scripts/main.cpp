@@ -8,6 +8,7 @@
 #include <cmath>
 #include <string>
 #include <algorithm>
+#include <cstring>
 
 // Have multiple conditions
 
